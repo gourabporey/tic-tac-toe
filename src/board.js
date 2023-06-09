@@ -1,10 +1,10 @@
-const Table = require('table');
-
 class Board {
   #boxes;
+  #formatter;
 
-  constructor({ height, width }) {
-    this.#boxes = this.#generateBoxes({ height, width })
+  constructor({ height, width }, tableFormatter) {
+    this.#boxes = this.#generateBoxes({ height, width });
+    this.#formatter = tableFormatter;
   }
 
   #generateBoxes({ height, width }) {
@@ -36,7 +36,7 @@ class Board {
     });
 
     renderer.clear();
-    renderer.log(Table.table(board));
+    renderer.log(this.#formatter(board));
   }
 }
 
