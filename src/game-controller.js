@@ -10,33 +10,30 @@ class GameController extends EventEmitter {
     this.#game = game;
   }
 
-  startGame() {
+  #startGame() {
     this.#game.startGame();
   }
 
-  consolidateMoveInGame(move) {
+  #consolidateMoveInGame(move) {
     if (move === 'q') {
-      this.emit('end');
+      this.#endGame();
       return;
     }
 
     this.#game.consolidateMove(move);
-    if (this.#game.isOver) this.emit('end');
+    if (this.#game.isOver) this.#endGame();
   }
 
-  endGame() {
+  #endGame() {
     this.#io.stdin.destroy();
     this.#game.printEndResult();
   }
 
   start() {
-    this.on('start', this.startGame);
-    this.on('move', this.consolidateMoveInGame);
-    this.on('end', this.endGame);
-    this.emit('start');
+    this.#startGame();
     this.#io.stdin.setEncoding('utf-8');
     this.#io.stdin.setRawMode(true);
-    this.#io.stdin.on('data', (data) => this.emit('move', data));
+    this.#io.stdin.on('data', this.#consolidateMoveInGame.bind(this));
   }
 
   stop() {
