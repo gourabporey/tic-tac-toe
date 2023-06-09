@@ -19,7 +19,7 @@ class Board {
     return point in this.#boxes;
   }
 
-  hasAvailableSpaceFor(point) {
+  canPlaceMove(point) {
     return this.#contains(point) && this.#boxes[point] === ' ';
   }
 

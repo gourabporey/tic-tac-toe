@@ -14,18 +14,14 @@ class Game {
   #board;
   #totalMoves;
   #isOver;
-  #hasWinner;
   #winner;
-  #currentPlayer;
-  #playersCount;
 
   constructor(players, board) {
     this.#players = players;
-    this.#playersCount = players.length;
     this.#board = board;
     this.#totalMoves = 0;
     this.#isOver = false;
-    this.#hasWinner = false;
+    this.#winner = null;
   }
 
   get isOver() {
@@ -38,14 +34,12 @@ class Game {
     });
   }
 
-  #promptPlayer() {
-    const name = this.#currentPlayer.name;
-    const icon = this.#currentPlayer.icon;
-    console.log(`${name}'s turn [${icon}]`);
+  #promptPlayer(player) {
+    console.log(`${player.name}'s turn [${player.icon}]`);
   }
 
   #printUsage() {
-    console.log(`Enter 'q' to quit`);
+    console.log(`Moves are [1 to 9]: Enter 'q' to quit`);
   }
 
   #getBoxNumber(move) {
@@ -53,43 +47,45 @@ class Game {
   }
 
   #choosePlayer() {
-    return this.#players[this.#totalMoves % this.#playersCount];
+    return this.#players[this.#totalMoves % this.#players.length];
   }
 
   #updateBoard(boxNumber) {
-    const board = this.#board;
-    const currentPlayer = this.#currentPlayer;
+    const currentPlayer = this.#choosePlayer();
 
-    if (board.hasAvailableSpaceFor(boxNumber)) {
-      board.put(boxNumber, currentPlayer.icon);
+    if (this.#board.canPlaceMove(boxNumber)) {
+      this.#board.put(boxNumber, currentPlayer.icon);
       currentPlayer.updateMoves(boxNumber);
       this.#totalMoves++;
     }
 
-    board.render(console);
+    this.#board.render(console);
 
     if (this.#hasWon(currentPlayer)) {
       this.#isOver = true;
-      this.#hasWinner = true;
       this.#winner = currentPlayer;
     }
 
-    this.#isOver = this.#totalMoves === 9 ? true : this.#isOver;
+    if (this.#totalMoves === 9) {
+      this.#isOver = true;
+    }
   }
 
   #changeCurrentPlayer() {
     if (!this.#isOver) {
-      this.#currentPlayer = this.#choosePlayer();
-      this.#promptPlayer();
-      this.#printUsage();
+      this.#showTurn();
     }
   }
 
-  startGame() {
+  #showTurn() {
     this.#board.render(console);
-    this.#currentPlayer = this.#players[0];
-    this.#promptPlayer();
+    const currentPlayer = this.#choosePlayer();
+    this.#promptPlayer(currentPlayer);
     this.#printUsage();
+  }
+
+  startGame() {
+    this.#showTurn();
   }
 
   consolidateMove(move) {
@@ -99,7 +95,7 @@ class Game {
   }
 
   printEndResult() {
-    const result = this.#hasWinner ? `${this.#winner.name} won!!` : 'It is a draw!!';
+    const result = this.#winner ? `${this.#winner.name} won!!` : 'It is a draw!!';
     console.log(result);
   }
 }

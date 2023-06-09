@@ -10,10 +10,6 @@ class GameController extends EventEmitter {
     this.#game = game;
   }
 
-  #startGame() {
-    this.#game.startGame();
-  }
-
   #consolidateMoveInGame(move) {
     if (move === 'q') {
       this.#endGame();
@@ -30,7 +26,7 @@ class GameController extends EventEmitter {
   }
 
   start() {
-    this.#startGame();
+    this.#game.startGame();
     this.#io.stdin.setEncoding('utf-8');
     this.#io.stdin.setRawMode(true);
     this.#io.stdin.on('data', this.#consolidateMoveInGame.bind(this));
