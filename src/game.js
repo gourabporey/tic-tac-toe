@@ -36,13 +36,29 @@ class Game {
     });
   }
 
+  #promptPlayer() {
+    const name = this.#currentPlayer.name;
+    const icon = this.#currentPlayer.icon;
+    console.log(`${name}'s turn [${icon}]`);
+  }
+
+  #printUsage() {
+    console.log(`Enter 'q' to quit`);
+  }
+
   #startGame() {
     this.#board.render(console);
     this.#currentPlayer = this.#players[0];
-    console.log(`${this.#currentPlayer.name}'s turn`);
+    this.#promptPlayer();
+    this.#printUsage();
   }
 
   #consolidateMove(move) {
+    if (move === 'q') {
+      this.#controller.emit('end');
+      return;
+    }
+
     const currentPlayer = this.#currentPlayer;
     const board = this.#board;
     const boxNumber = +move - 1;
@@ -69,7 +85,8 @@ class Game {
     }
 
     this.#currentPlayer = this.#players[this.#totalMoves % PLAYER_COUNT];
-    console.log(`${this.#currentPlayer.name}'s turn`);
+    this.#promptPlayer();
+    this.#printUsage();
   }
 
   #printEndResult() {

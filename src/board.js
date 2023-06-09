@@ -1,3 +1,5 @@
+const Table = require('table');
+
 class Board {
   #boxes;
 
@@ -34,7 +36,7 @@ class Board {
     });
 
     renderer.clear();
-    renderer.table(board);
+    renderer.log(Table.table(board));
   }
 }
 
