@@ -9,6 +9,8 @@ const WINNING_SEQUENCES = [
   [2, 4, 6]
 ];
 
+const PLAYER_COUNT = 2;
+
 class Game {
   #players;
   #board;
@@ -17,6 +19,7 @@ class Game {
   #hasWinner;
   #controller;
   #winner;
+  #currentPlayer;
 
   constructor(players, board, controller) {
     this.#players = players;
@@ -30,47 +33,57 @@ class Game {
   #hasWon(player) {
     return WINNING_SEQUENCES.some(sequence => {
       return sequence.every(element => player.moves.includes(element));
-    })
+    });
+  }
+
+  #startGame() {
+    this.#board.render(console);
+    this.#currentPlayer = this.#players[0];
+    console.log(`${this.#currentPlayer.name}'s turn`);
+  }
+
+  #consolidateMove(move) {
+    const currentPlayer = this.#currentPlayer;
+    const board = this.#board;
+    const boxNumber = +move - 1;
+
+    if (board.hasAvailableSpaceFor(boxNumber)) {
+      board.put(boxNumber, currentPlayer.icon);
+      currentPlayer.updateMoves(boxNumber);
+      this.#totalMoves++;
+    }
+
+    board.render(console);
+
+    if (this.#hasWon(currentPlayer)) {
+      this.#gameOver = true;
+      this.#hasWinner = true;
+      this.#winner = currentPlayer;
+    }
+
+    this.#gameOver = this.#totalMoves === 9 ? true : this.#gameOver;
+
+    if (this.#gameOver) {
+      this.#controller.emit('end');
+      return;
+    }
+
+    this.#currentPlayer = this.#players[this.#totalMoves % PLAYER_COUNT];
+    console.log(`${this.#currentPlayer.name}'s turn`);
+  }
+
+  #printEndResult() {
+    const result = this.#hasWinner ? `winner: ${this.#winner.name}` : 'It is a draw';
+    console.log('Game Ended -', result);
+    this.#controller.stop();
   }
 
   start() {
-    const inputStream = this.#controller.start();
-    const PLAYERS_COUNT = 2;
-    const board = this.#board;
-    board.render(console);
-
-    inputStream.on('data', (move) => {
-      const currentPlayer = this.#players[this.#totalMoves % PLAYERS_COUNT];
-      console.log(`${currentPlayer.name}'s turn`);
-
-      if (board.contains(move) && board.hasAvailableSpaceFor(move)) {
-        currentPlayer.updateMoves(+move);
-        board.put(move, currentPlayer.icon);
-
-        if (this.#hasWon(currentPlayer)) {
-          this.#gameOver = true;
-          this.#hasWinner = true;
-          this.#winner = currentPlayer;
-        }
-
-        this.#totalMoves++;
-      }
-
-      board.render(console);
-
-      if (this.#totalMoves === 9) {
-        this.#gameOver = true;
-      }
-
-      if (this.#gameOver) {
-        inputStream.destroy();
-        if (this.#hasWinner) {
-          console.log(this.#winner.name, 'won');
-        } else {
-          console.log('It is a draw');
-        }
-      }
-    });
+    this.#controller.on('start', this.#startGame.bind(this));
+    this.#controller.on('move', this.#consolidateMove.bind(this));
+    this.#controller.on('end', this.#printEndResult.bind(this));
+    const controller = this.#controller.start();
+    controller.on('data', (data) => this.#controller.emit('move', data));
   }
 }
 

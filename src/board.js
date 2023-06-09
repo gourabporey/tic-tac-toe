@@ -13,12 +13,12 @@ class Board {
     this.#boxes[point] = glyph;
   }
 
-  contains(point) {
+  #contains(point) {
     return point in this.#boxes;
   }
 
   hasAvailableSpaceFor(point) {
-    return this.#boxes[point] === ' ';
+    return this.#contains(point) && this.#boxes[point] === ' ';
   }
 
   render(renderer) {
@@ -33,6 +33,7 @@ class Board {
       board.push([box]);
     });
 
+    renderer.clear();
     renderer.table(board);
   }
 }
