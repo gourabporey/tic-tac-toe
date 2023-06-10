@@ -15,6 +15,7 @@ class Game {
   #totalMoves;
   #isOver;
   #winner;
+  #writer;
 
   constructor(players, board) {
     this.#players = players;
@@ -34,12 +35,12 @@ class Game {
     });
   }
 
-  #promptPlayer(player) {
-    console.log(`${player.name}'s turn [${player.icon}]`);
+  #requestInput(player) {
+    this.#writer.writeLine(`${player.name}'s turn [${player.icon}]\n`);
   }
 
   #printUsage() {
-    console.log(`Moves are [1 to 9]: Enter 'q' to quit`);
+    this.#writer.writeLine(`Moves are [1 to 9]: Enter 'q' to quit\n`);
   }
 
   #getBoxNumber(move) {
@@ -59,7 +60,7 @@ class Game {
       this.#totalMoves++;
     }
 
-    this.#board.render(console);
+    this.#board.render(this.#writer);
 
     if (this.#hasWon(currentPlayer)) {
       this.#isOver = true;
@@ -78,13 +79,14 @@ class Game {
   }
 
   #showTurn() {
-    this.#board.render(console);
+    this.#board.render(this.#writer);
     const currentPlayer = this.#choosePlayer();
-    this.#promptPlayer(currentPlayer);
+    this.#requestInput(currentPlayer);
     this.#printUsage();
   }
 
-  startGame() {
+  startGame(writer) {
+    this.#writer = writer;
     this.#showTurn();
   }
 
@@ -95,8 +97,8 @@ class Game {
   }
 
   printEndResult() {
-    const result = this.#winner ? `${this.#winner.name} won!!` : 'It is a draw!!';
-    console.log(result);
+    const result = this.#winner ? `${this.#winner.name} won!!\n` : 'It is a draw!!\n';
+    this.#writer.writeLine(result);
   }
 }
 

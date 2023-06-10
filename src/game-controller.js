@@ -21,19 +21,17 @@ class GameController extends EventEmitter {
   }
 
   #endGame() {
-    this.#io.stdin.destroy();
-    this.#game.printEndResult();
+    this.#io.stop();
+    this.#game.printEndResult(this.#io);
   }
 
   start() {
-    this.#game.startGame();
-    this.#io.stdin.setEncoding('utf-8');
-    this.#io.stdin.setRawMode(true);
-    this.#io.stdin.on('data', this.#consolidateMoveInGame.bind(this));
+    this.#game.startGame(this.#io);
+    this.#io.readChar(this.#consolidateMoveInGame.bind(this));
   }
 
   stop() {
-    this.#io.stdin.destroy();
+    this.#io.stop();
   }
 }
 

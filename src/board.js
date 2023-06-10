@@ -35,8 +35,8 @@ class Board {
       board.push([box]);
     });
 
-    renderer.clear();
-    renderer.log(this.#formatter(board));
+    renderer.clearScreen();
+    renderer.writeLine(this.#formatter(board));
   }
 }
 
