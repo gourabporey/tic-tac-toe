@@ -2,37 +2,24 @@ class Player {
   #name;
   #icon;
   #moves;
-  #status;
 
   constructor(name, icon) {
     this.#name = name;
     this.#icon = icon;
-    this.#moves = [];
-  }
-
-  set status(result) {
-    this.#status = result;
+    this.#moves = new Set();
   }
 
   get name() {
     return this.#name;
   }
 
-  get icon() {
-    return this.#icon;
-  }
-
-  get status() {
-    return this.#status;
-  }
-
-  get moves() {
-    return [...(this.#moves)];
+  get movesMade() {
+    return [...(this.#moves)].map(move => [move, this.#icon]);
   }
 
   updateMoves(playerMove) {
-    this.#moves.push(playerMove);
+    this.#moves.add(playerMove);
   }
 }
 
-exports.Player = Player;
+module.exports = { Player };

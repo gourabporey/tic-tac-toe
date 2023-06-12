@@ -1,38 +1,32 @@
-const EventEmitter = require('events');
-
-class GameController extends EventEmitter {
-  #io;
+class GameController {
   #game;
+  #renderer;
+  #inputController;
 
-  constructor(io, game) {
-    super();
-    this.#io = io;
+  constructor(game, IOController, renderer) {
     this.#game = game;
-  }
-
-  #consolidateMoveInGame(move) {
-    if (move === 'q') {
-      this.#endGame();
-      return;
-    }
-
-    this.#game.consolidateMove(move);
-    if (this.#game.isOver) this.#endGame();
-  }
-
-  #endGame() {
-    this.#io.stop();
-    this.#game.printEndResult(this.#io);
+    this.#renderer = renderer;
+    this.#inputController = IOController;
   }
 
   start() {
-    this.#game.startGame(this.#io);
-    this.#io.readChar(this.#consolidateMoveInGame.bind(this));
-  }
+    this.#renderer.render(this.#game.status());
 
-  stop() {
-    this.#io.stop();
+    this.#inputController.on('move-entered', (keyPressed) => {
+      this.#game.consolidateMove(keyPressed);
+      this.#renderer.render(this.#game.status());
+      if (this.#game.status().isOver) {
+        this.#inputController.stop();
+      }
+    });
+
+    this.#inputController.on('illegal-move-entered', (move) => {
+      this.#renderer.render(this.#game.status());
+      console.log('Illegal Move', move);
+    });
+
+    this.#inputController.start();
   }
 }
 
-exports.GameController = GameController;
+module.exports = { GameController };
